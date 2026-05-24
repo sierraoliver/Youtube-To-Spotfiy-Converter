@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block title %}
+<title>Youtube to Spotify Playlist Converter</title>
+{% endblock %}
+
+{% block body %}
+<div class ="header">
+    <form method="POST">
+        <label for="playlist">Youtube Link:</label>
+        <input type="text" id="playlist" name="playlist" placeholder="https://www.youtube.com/...">
+        <label for="genre">Genre Name:</label>
+        <input type="text" id="genre" name="genre" placeholder="pop/rock/edm...">
+        <button type="submit">Convert</button>
+    </form>
+</div>
+
+{% for item in youtube_list %}
+  <div>
+    <p>{{ item[0] }}</p>
+    <p>{{ item[1] }}</p>
+    <img src="{{ item[2] }}" width="120">
+  </div>
+{% endfor %}
+
+{% for song in spotify_list %}
+  <div>
+    <p>{{ song.artist }} - {{ song.track }}</p>
+    <img src="{{ song.thumbnail }}" width="120">
+
+    {% if song.uri %}
+      <a href="https://open.spotify.com/track/{{ song.uri.split(':')[-1] }}">
+        Open in Spotify
+      </a>
+    {% else %}
+      <p>Not found on Spotify</p>
+    {% endif %}
+  </div>
+{% endfor %}
+{% endblock %}
