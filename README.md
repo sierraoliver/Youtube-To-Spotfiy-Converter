@@ -53,6 +53,6 @@ SPOTIFY_REDIRECT_URI=http://127.0.0.1:8888/callback
 Run the application:
 
 ```bash
-python main.py
+python app.py
 ```
 ------------------------------------------------------------------------------------
