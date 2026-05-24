@@ -55,5 +55,7 @@ Run the application:
 ```bash
 python app.py
 ```
+
 note: to run without in progress UI, use logic.py and run main(<insert youtube playlist URL>, <insert genre>) and make sure to uncomment last section of main function to add playlist to spotify acccount
+
 ------------------------------------------------------------------------------------
