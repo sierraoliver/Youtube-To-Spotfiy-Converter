@@ -2,3 +2,8 @@ google-api-python-client
 spotipy
 tqdm
 python-dotenv
+requests
+
+Flask
+Flask-SQLAlchemy
+SQLAlchemy
