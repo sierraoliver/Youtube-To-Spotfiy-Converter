@@ -7,6 +7,7 @@ from difflib import SequenceMatcher
 import os
 from dotenv import load_dotenv
 import re
+import unicodedata
 
 BAD_KEYWORDS = [
     "released on",
@@ -70,13 +71,15 @@ def clean_track(track):
     track = track.lower()
     track = re.sub(r"\(.*?(extended|remix|edit|version).*?\)", "", track)
     track = re.sub(r"\[.*?\]", "", track)
-    track = re.sub(r"[^a-z0-9 ]", "", track)
+    track = re.sub(r"[^\w\sÆæŒœ\-]", "", track)
     track = re.sub(r"\s+", " ", track).strip()
     return track
 
 def normalize(text): 
-    text = text.lower() 
-    text = re.sub(r"[^a-z0-9 ]", "", text) 
+    text = text.lower()
+    text = unicodedata.normalize("NFKD", text)
+    text = "".join(c for c in text if not unicodedata.combining(c))
+    text = re.sub(r"[^\w\s]", "", text)
     return re.sub(r"\s+", " ", text).strip()
 
 def safe_query(text, max_len=120):
@@ -189,7 +192,12 @@ def main(playlist, genre):
             id=video_id
         ).execute()
 
-        video_snippet = video_data["items"][0]["snippet"]
+        items = video_data.get("items", [])
+
+        if not items:
+            continue  
+
+        video_snippet = items[0]["snippet"]
         channel = video_snippet.get("channelTitle", "")
 
         candidates = []
@@ -199,7 +207,7 @@ def main(playlist, genre):
 
         for artist, track in parse_description(desc):
             if is_valid_candidate(track) and is_valid_candidate(artist):
-                desc_candidates.append((normalize(artist or ""), clean_track(track), thumbnail))
+                desc_candidates.append((clean_track(artist or ""), clean_track(track), thumbnail))
 
         if desc_candidates:
             candidates = desc_candidates
@@ -209,7 +217,7 @@ def main(playlist, genre):
             artist, track = parse_video_title(title)
 
             if track:
-                candidates.append((normalize(artist or ""), clean_track(track), thumbnail))
+                candidates.append((clean_track(artist or ""), clean_track(track), thumbnail))
 
         for artist, track, tb in candidates:
             if not track:
@@ -266,8 +274,7 @@ def main(playlist, genre):
                     })
 
     print("\nTOTAL FOUND:", len(track_uris))
-
-    '''
+    
     playlist = sp.user_playlist_create(
         user=sp.current_user()["id"],
         name=get_playlist_title(youtube, playlist_id),
@@ -276,6 +283,5 @@ def main(playlist, genre):
 
     for chunk in chunk_list(track_uris, 100):
         sp.playlist_add_items(playlist["id"], chunk)
-    '''
 
     return youtube_list, track_data
